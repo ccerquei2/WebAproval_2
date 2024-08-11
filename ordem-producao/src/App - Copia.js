@@ -8,7 +8,6 @@ function App() {
   const [agentAnalysis, setAgentAnalysis] = useState(null);
   const [exceededValues, setExceededValues] = useState(null);
   const [message, setMessage] = useState('');
-  const [selectedModel, setSelectedModel] = useState('llama3-70b-8192'); // Default selected model
 
   const fetchVariations = async () => {
     setMessage('');
@@ -69,7 +68,7 @@ function App() {
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ seq_key: seqKey, justification, model: selectedModel }) // Sending selected model
+        body: JSON.stringify({ seq_key: seqKey, justification })
       });
       const data = await res.json();
       if (res.ok) {
@@ -93,19 +92,6 @@ function App() {
     <div className="container">
       <img src="/LogoGranado.jpg" alt="Granado AI Solution" className="logo" />
       <h1>Aprovação de WO Assistida por AI</h1>
-
-      <div className="combo-container">
-        <label className="combo-label">Selecione o modelo</label>
-        <select 
-          className="combo-select"
-          value={selectedModel} 
-          onChange={(e) => setSelectedModel(e.target.value)}
-        >
-          <option value="llama3-70b-8192">Llama3-70b-8192</option>
-          <option value="llama-3.1-70b-versatile">Llama-3.1-70b-Versatile</option>
-        </select>
-      </div>
-
       <form onSubmit={(e) => e.preventDefault()}>
         <label className="variaçoes">Variações</label>
         <input 
@@ -116,7 +102,6 @@ function App() {
         />
         <button type="button" onClick={fetchVariations}>Carregar</button>
       </form>
-      
       {variations && (
         <div>
           <table>
@@ -152,7 +137,6 @@ function App() {
           </table>
         </div>
       )}
-      
       <div>
         <h2>Justificativa</h2>
         <textarea 
@@ -163,7 +147,6 @@ function App() {
         />
         <button type="button" onClick={submitJustification}>Enviar</button>
       </div>
-      
       {agentAnalysis && (
         <div className="agent-analysis-container">
           <h2>Analise do Agente</h2>
@@ -203,7 +186,6 @@ function App() {
           </table>
         </div>
       )}
-      
       {exceededValues && (
         <div>
           <h2>Analise Valores Excedentes</h2>
@@ -216,24 +198,23 @@ function App() {
               </tr>
             </thead>
             <tbody>
-            {Object.keys(exceededValues).map((key, index) => {
-            if (key.endsWith('_EXCEDE_LIMITE') && exceededValues[key]) { // Correct syntax for endsWith
-              const valueKey = key.replace('_EXCEDE_LIMITE', '');
-              return (
-                <tr key={index}>
-                  <td>{valueKey}</td>
-                  <td>{formatNumber(exceededValues[valueKey])}</td>
-                  <td>{formatNumber(exceededValues[`LIMITE_${valueKey}`])}</td>
-                </tr>
-              );
-            }
-            return null;
-          })}
+              {Object.keys(exceededValues).map((key, index) => {
+                if (key.endsWith('_EXCEDE_LIMITE') && exceededValues[key]) {
+                  const valueKey = key.replace('_EXCEDE_LIMITE', '');
+                  return (
+                    <tr key={index}>
+                      <td>{valueKey}</td>
+                      <td>{formatNumber(exceededValues[valueKey])}</td>
+                      <td>{formatNumber(exceededValues[`LIMITE_${valueKey}`])}</td>
+                    </tr>
+                  );
+                }
+                return null;
+              })}
             </tbody>
           </table>
         </div>
       )}
-      
       {message && <p style={{ color: 'red', fontWeight: 'bold' }}>{message}</p>}
     </div>
   );

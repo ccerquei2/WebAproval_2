@@ -51,7 +51,7 @@ class Analise:
 
     def extrair_dados_agente(self, SEQ_KEY):
         query = f"""
-        SELECT
+        SELECT 
             [CHAVE SEQUENCIA] = A.GFN001,
             [ORDEM DE PRODUCAO] = A.GFDOCO,
             [SEQUENCIA REGISTRO] = A.GFN002,
@@ -65,7 +65,7 @@ class Analise:
             [JUSTIFICATIVA DO AGENTE] = A.GFNOTTE,
             [VALORES EXCEDENTES] = A.GFANSR
         FROM CRPDTA.FN31112Z A
-        WHERE
+        WHERE 
             A.GFN002 = (SELECT MAX(B.GFN002) FROM CRPDTA.FN31112Z B WHERE B.GFN001 = A.GFN001) AND
             A.GFN001 = {SEQ_KEY}
         """
@@ -76,8 +76,6 @@ class Analise:
             return df
         else:
             return None
-
-
 
     def get_max_sequencia(self, SEQ_KEY):
         query = f"SELECT MAX(B.GFN002) AS max_seq FROM CRPDTA.FN31112Z B WHERE B.GFN001 = {SEQ_KEY}"
@@ -122,43 +120,11 @@ def get_agent_analysis():
         return jsonify({"error": "Error fetching data from the database"}), 500
 
 
-# @app.route('/submit_justification', methods=['POST'])
-# def submit_justification():
-#     data = request.json
-#     seq_key = data.get('seq_key')
-#     justification = data.get('justification', '')
-#
-#     if not seq_key:
-#         return jsonify({"error": "SEQ_KEY is required"}), 400
-#
-#     analise = Analise()
-#     initial_max_seq = analise.get_max_sequencia(seq_key)
-#
-#     try:
-#         executable_path = os.path.join(os.getcwd(), 'AI_WO_Approval.exe')
-#         print(f"Received justification: {justification}")
-#         print(f"Executing: {executable_path} {seq_key} {justification}")
-#         result = subprocess.run([executable_path, str(seq_key), justification], capture_output=True, text=True)
-#         print(f"Output: {result.stdout}")
-#         print(f"Error: {result.stderr}")
-#
-#         final_max_seq = analise.get_max_sequencia(seq_key)
-#         if final_max_seq > initial_max_seq:
-#             return jsonify({"output": result.stdout, "error": result.stderr})
-#         else:
-#             return jsonify({
-#                                "error": "Ocorreu Uma Falha Na Analise. Por gentileza, clique novamente em Enviar e submeta novamente a analise aos Agentes"}), 500
-#     except Exception as e:
-#         print(f"Exception: {e}")
-#         return jsonify({"error": str(e)}), 500
-
-
 @app.route('/submit_justification', methods=['POST'])
 def submit_justification():
     data = request.json
     seq_key = data.get('seq_key')
     justification = data.get('justification', '')
-    model = data.get('model', '')  # Retrieve the model name, default to an empty string if not provided
 
     if not seq_key:
         return jsonify({"error": "SEQ_KEY is required"}), 400
@@ -169,12 +135,8 @@ def submit_justification():
     try:
         executable_path = os.path.join(os.getcwd(), 'AI_WO_Approval.exe')
         print(f"Received justification: {justification}")
-        print(f"Received model: {model}")
-        print(f"Executing: {executable_path} {seq_key} {justification} {model}")
-
-        # Modify the subprocess call to include the model parameter
-        result = subprocess.run([executable_path, str(seq_key), justification, model], capture_output=True, text=True)
-
+        print(f"Executing: {executable_path} {seq_key} {justification}")
+        result = subprocess.run([executable_path, str(seq_key), justification], capture_output=True, text=True)
         print(f"Output: {result.stdout}")
         print(f"Error: {result.stderr}")
 
@@ -183,8 +145,7 @@ def submit_justification():
             return jsonify({"output": result.stdout, "error": result.stderr})
         else:
             return jsonify({
-                "error": "Ocorreu Uma Falha Na Analise. Por gentileza, clique novamente em Enviar e submeta novamente a analise aos Agentes"
-            }), 500
+                               "error": "Ocorreu Uma Falha Na Analise. Por gentileza, clique novamente em Enviar e submeta novamente a analise aos Agentes"}), 500
     except Exception as e:
         print(f"Exception: {e}")
         return jsonify({"error": str(e)}), 500
